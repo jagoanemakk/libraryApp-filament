@@ -38,8 +38,12 @@ class LoansResource extends Resource
 
     public static function table(Table $table): Table
     {
+        $userRoles = auth()->user()->roles->pluck('name')->first();
+
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('users.name')
+                    ->visible($userRoles == 'Super Admin'),
                 Tables\Columns\TextColumn::make('books.name')
                     ->numeric()
                     ->sortable(),
@@ -52,10 +56,6 @@ class LoansResource extends Resource
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                // Tables\Columns\TextColumn::make('updated_at')
-                //     ->dateTime()
-                //     ->sortable()
-                //     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //
