@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\LoansResource\Pages;
 use App\Filament\Resources\LoansResource\RelationManagers;
 use App\Models\Loans;
+use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -20,6 +21,19 @@ class LoansResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     protected static ?string $navigationGroup = "Transaction";
+
+    public function getDueDateStatusAttribute()
+    {
+        // $today = Carbon::today();
+        // $dueDate = $this->due_date;
+
+        // if ($dueDate >= $today) {
+        //     $daysLeft = $dueDate->diffInDays($today);
+        //     return "{$daysLeft} Hari";
+        // } else {
+        //     return "Lewat jatuh tempo";
+        // }
+    }
 
     public static function form(Form $form): Form
     {
@@ -50,8 +64,8 @@ class LoansResource extends Resource
                 Tables\Columns\TextColumn::make('due_date')
                     ->date()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('status')
-                    ->searchable(),
+                Tables\Columns\TextColumn::make('loan_status')
+                    ->label('Status'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
