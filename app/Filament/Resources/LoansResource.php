@@ -65,6 +65,11 @@ class LoansResource extends Resource
                     ->date()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('loan_status')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'Today' => 'warning',
+                        'Expired' => 'danger'
+                    })
                     ->label('Status'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()

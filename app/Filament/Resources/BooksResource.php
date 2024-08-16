@@ -111,6 +111,11 @@ class BooksResource extends Resource
                     ->searchable()
                     ->limit(50),
                 Tables\Columns\TextColumn::make('status')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'Available' => 'success',
+                        'Not Available' => 'warning'
+                    })
                     ->searchable(),
             ])
             ->filters([

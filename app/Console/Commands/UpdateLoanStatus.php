@@ -36,8 +36,8 @@ class UpdateLoanStatus extends Command
         DB::beginTransaction();
 
         try {
-            $expiryLoans = Loans::where('due_date', '<=', $today)->where('loan_status', '=', null)->get();
-            $todayLoans = Loans::where('due_date', '=', $today)->where('loan_status', '=', null)->get();
+            $expiryLoans = Loans::where('due_date', '<=', $today)->get();
+            $todayLoans = Loans::where('due_date', '=', $today)->get();
 
             foreach ($expiryLoans as $expiryLoan) {
                 //Update each ex$expiryLoan as you want to
