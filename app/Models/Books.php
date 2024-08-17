@@ -15,6 +15,7 @@ class Books extends Model
         'name',
         'author',
         'description',
+        'qty',
         'status',
         'image',
     ];

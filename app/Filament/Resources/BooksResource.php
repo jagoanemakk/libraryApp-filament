@@ -110,13 +110,14 @@ class BooksResource extends Resource
                 Tables\Columns\TextColumn::make('description')
                     ->searchable()
                     ->limit(50),
-                Tables\Columns\TextColumn::make('status')
-                    ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'Available' => 'success',
-                        'Not Available' => 'warning'
+                Tables\Columns\TextColumn::make('qty')
+                    ->label('Quantity')
+                    ->formatStateUsing(function ($state) {
+                        return $state > 0 ? $state : 'Not Available';
                     })
-                    ->searchable(),
+                    ->alignCenter()
+                    ->badge()
+                    ->color(fn ($state) => $state > 0 ? 'success' : 'warning')
             ])
             ->filters([
                 //
@@ -129,7 +130,7 @@ class BooksResource extends Resource
                         ->modalHeading('Get Loans ?')
                         ->modalDescription('Are you sure you\'d like to loan this books ?')
                         ->modalSubmitActionLabel('Yes, I am sure')
-                        ->action(function (Loans $loans, Books $books, User $user) {
+                        ->action(function (Loans $loans, Books $books) {
                             $totalLoans = Loans::where('user_id', auth()->user()->id)->count();
 
                             $userRole = auth()->user()->roles->pluck("name")->first();
@@ -137,7 +138,12 @@ class BooksResource extends Resource
                             if ($userRole == 'Member' && $totalLoans == 2) {
 
                                 Notification::make()
-                                    ->title('Loans failed')
+                                    ->title("You have reach limit of loans")
+                                    ->warning()
+                                    ->send();
+                            } else if ($books->qty <= 0) {
+                                Notification::make()
+                                    ->title("Not Available")
                                     ->warning()
                                     ->send();
                             } else {
@@ -146,6 +152,10 @@ class BooksResource extends Resource
                                 $loans->due_date = date('Y-m-d H:i:s');
                                 $loans->save();
 
+                                // Books::findOrFail($books->id);
+                                $books->qty -= 1;
+                                $books->save();
+
                                 Notification::make()
                                     ->title('Loans Succesfull')
                                     ->success()
@@ -153,8 +163,7 @@ class BooksResource extends Resource
                             }
                         }),
                     Tables\Actions\EditAction::make(),
-                    Tables\Actions\ViewAction::make(),
-                    Tables\Actions\DeleteAction::make(),
+                    // Tables\Actions\DeleteAction::make(),
                 ])
             ])
             ->bulkActions([
