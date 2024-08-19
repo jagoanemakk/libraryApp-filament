@@ -39,6 +39,10 @@ class Loans extends Model
         'loan_status'
     ];
 
+    protected $casts = [
+        'due_date' => 'date:YYYY-MM-DD',
+    ];
+
     public function users(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
@@ -47,21 +51,5 @@ class Loans extends Model
     public function books(): BelongsTo
     {
         return $this->belongsTo(Books::class);
-    }
-
-    public function getDueDateStatusAttribute()
-    {
-        $today = Carbon::today();
-        $dueDate = $this->due_date;
-
-        if ($dueDate > $today) {
-            $daysLeft = $dueDate->diffInDays($today);
-            return "{$daysLeft} Hari";
-        } else if ($dueDate == $today) {
-            // $daysLeft = $dueDate->diffInDays($today);
-            return "Todays";
-        } else {
-            return "Expired";
-        }
     }
 }

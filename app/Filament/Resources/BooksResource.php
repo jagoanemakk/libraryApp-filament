@@ -7,10 +7,15 @@ use App\Filament\Resources\BooksResource\RelationManagers;
 use App\Models\Books;
 use App\Models\Loans;
 use App\Models\User;
+use Carbon\Carbon;
 // use Tables\Actions\Action;
 use Tables\Actions\ActionGroup;
 use Filament\Forms;
+use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Wizard\Step;
 use Filament\Forms\Form;
 use Filament\Forms\Set;
 use Filament\Infolists\Components\Grid;
@@ -22,7 +27,9 @@ use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\MaxWidth;
 use Filament\Tables;
+use Filament\Tables\Columns\CheckboxColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -126,42 +133,57 @@ class BooksResource extends Resource
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\Action::make('Get Loans')
                         ->icon('heroicon-o-book-open')
-                        ->requiresConfirmation()
-                        ->modalHeading('Get Loans ?')
-                        ->modalDescription('Are you sure you\'d like to loan this books ?')
-                        ->modalSubmitActionLabel('Yes, I am sure')
-                        ->action(function (Loans $loans, Books $books) {
-                            $totalLoans = Loans::where('user_id', auth()->user()->id)->count();
+                        ->modalHeading('Return date')
+                        ->modalDescription('Maximum period of loan is 14 days')
+                        ->modalWidth(MaxWidth::Medium)
+                        ->mountUsing(fn (Forms\ComponentContainer $form, Loans $loans) => $form->fill([
+                            'due_date' => $loans->due_date
+                        ]))
+                        ->form([
+                            Forms\Components\DatePicker::make('due_date')
+                                ->label('Select Date')
+                                ->format('Y-m-d')
+                                ->native(false)
+                                ->suffixIcon('heroicon-m-calendar-date-range')
+                                ->closeOnDateSelection()
+                                ->minDate(today())
+                                ->maxDate(today()->addDays(14))
+                                ->required()
+                        ])
+                        ->action(
+                            function (Loans $loans, Books $books, array $data): void {
+                                $totalLoans = Loans::where('user_id', auth()->user()->id)->count();
 
-                            $userRole = auth()->user()->roles->pluck("name")->first();
+                                $userRole = auth()->user()->roles->pluck("name")->first();
 
-                            if ($userRole == 'Member' && $totalLoans == 2) {
+                                if ($userRole == 'Member' && $totalLoans == 2) {
 
-                                Notification::make()
-                                    ->title("You have reach limit of loans")
-                                    ->warning()
-                                    ->send();
-                            } else if ($books->qty <= 0) {
-                                Notification::make()
-                                    ->title("Not Available")
-                                    ->warning()
-                                    ->send();
-                            } else {
-                                $loans->user_id = auth()->user()->id;
-                                $loans->books_id = $books->id;
-                                $loans->due_date = date('Y-m-d H:i:s');
-                                $loans->save();
+                                    Notification::make()
+                                        ->title("You have reach limit of loans")
+                                        ->warning()
+                                        ->send();
+                                } else if ($books->qty <= 0) {
+                                    Notification::make()
+                                        ->title("Not Available")
+                                        ->warning()
+                                        ->send();
+                                } else {
+                                    $loans->user_id = auth()->user()->id;
+                                    $loans->books_id = $books->id;
+                                    $loans->fill($data);
+                                    // $loans->due_date = $loans->due_date->associate($data['due_date'])->format('d-m-Y');
+                                    $loans->save();
 
-                                // Books::findOrFail($books->id);
-                                $books->qty -= 1;
-                                $books->save();
+                                    $books->qty -= 1;
+                                    $books->save();
 
-                                Notification::make()
-                                    ->title('Loans Succesfull')
-                                    ->success()
-                                    ->send();
+                                    Notification::make()
+                                        ->title('Loans Succesfull')
+                                        ->success()
+                                        ->send();
+                                }
                             }
-                        }),
+                        ),
                     Tables\Actions\EditAction::make(),
                     // Tables\Actions\DeleteAction::make(),
                 ])

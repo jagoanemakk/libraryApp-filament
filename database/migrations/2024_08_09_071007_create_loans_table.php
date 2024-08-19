@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('books_id')->constrained('books')->cascadeOnDelete();
-            $table->date('due_date');
+            $table->date('due_date')->format('d-m-Y');
             $table->string('loan_status')->nullable();
             $table->timestamps();
         });
