@@ -22,19 +22,6 @@ class LoansResource extends Resource
 
     protected static ?string $navigationGroup = "Transaction";
 
-    public function getDueDateStatusAttribute()
-    {
-        // $today = Carbon::today();
-        // $dueDate = $this->due_date;
-
-        // if ($dueDate >= $today) {
-        //     $daysLeft = $dueDate->diffInDays($today);
-        //     return "{$daysLeft} Hari";
-        // } else {
-        //     return "Lewat jatuh tempo";
-        // }
-    }
-
     public static function form(Form $form): Form
     {
         return $form

@@ -7,16 +7,22 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\Tags\HasTags;
 
 class Books extends Model
 {
     use HasFactory;
+
+    protected $casts = [
+        'tags' => 'array',
+    ];
 
     protected $fillable = [
         'categories_id',
         'name',
         'author',
         'description',
+        'tags',
         'qty',
         'status',
         'image',

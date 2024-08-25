@@ -6,6 +6,7 @@ use App\Filament\Resources\BooksResource\Pages;
 use App\Filament\Resources\BooksResource\RelationManagers;
 use App\Models\Books;
 use App\Models\Loans;
+use App\Models\Tags;
 use App\Models\User;
 use Carbon\Carbon;
 // use Tables\Actions\Action;
@@ -14,6 +15,7 @@ use Filament\Forms;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\SpatieTagsInput;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Wizard\Step;
 use Filament\Forms\Form;
@@ -22,17 +24,20 @@ use Filament\Infolists\Components\Grid;
 use Filament\Infolists\Components\Group;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\SpatieTagsEntry;
 use Filament\Infolists\Components\Split;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\IconPosition;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Tables;
 use Filament\Tables\Columns\CheckboxColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Spatie\Tags\Tag;
 
 class BooksResource extends Resource
 {
@@ -54,12 +59,26 @@ class BooksResource extends Resource
                                     Group::make([
                                         TextEntry::make('name'),
                                         TextEntry::make('author'),
-                                        TextEntry::make('status')
+                                        TextEntry::make('qty')
+                                            ->label('Status')
+                                            ->formatStateUsing(function ($state) {
+                                                return $state > 0 ? 'Available' : 'Not Available';
+                                            })
                                             ->badge()
-                                            ->color('success')
+                                            ->color(fn ($state) => $state > 0 ? 'success' : 'warning')
                                     ]),
                                     Group::make([
                                         TextEntry::make('categories.name'),
+                                        TextEntry::make('qty')
+                                            ->label('Quantity')
+                                            ->badge()
+                                            ->color(fn ($state) => $state > 0 ? 'success' : 'warning'),
+                                        TextEntry::make('tags')
+                                            ->badge()
+                                            ->color('success')
+                                            ->separator(',')
+                                            ->icon('heroicon-s-hashtag')
+                                            ->iconPosition(IconPosition::Before)
                                     ]),
                                 ]), ImageEntry::make('image')
                                 ->height(200)
@@ -93,8 +112,10 @@ class BooksResource extends Resource
                     ->maxLength(255),
                 Forms\Components\TextInput::make('author')
                     ->maxLength(255),
-                Forms\Components\TextInput::make('status')
-                    ->maxLength(255),
+                Forms\Components\TagsInput::make('tags')
+                    ->label('Tags')
+                    ->separator(',')
+                    ->required(),
                 Forms\Components\Textarea::make('description')
                     ->maxLength(255)
                     ->columnSpan(2)
