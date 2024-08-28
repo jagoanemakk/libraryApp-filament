@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\Loans;
+use App\Models\Monetary;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Exception;
@@ -36,18 +37,21 @@ class UpdateLoanStatus extends Command
         DB::beginTransaction();
 
         try {
-            $expiryLoans = Loans::where('due_date', '<=', $today)->get();
-            $todayLoans = Loans::where('due_date', '=', $today)->get();
+            $expiredLoans = Loans::where('due_date', '<=', $today)->get();
+            $todayLoans = Loans::where('due_date', '==', $today)->get();
 
-            foreach ($expiryLoans as $expiryLoan) {
+            // if ($expiredLoans->loan_status == NULL) {
+            foreach ($expiredLoans as $expiryLoan) {
                 //Update each ex$expiryLoan as you want to
                 $expiryLoan->loan_status = 'Expired';
+                $expiryLoan->updated_at = Carbon::now()->format('Y-m-d H:i:s');
                 $expiryLoan->update();
             }
 
             foreach ($todayLoans as $todayLoan) {
                 //Update each ex$expiryLoan as you want to
                 $todayLoan->loan_status = 'Today';
+                $todayLoan->updated_at = $today;
                 $todayLoan->update();
             }
 

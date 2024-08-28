@@ -58,6 +58,9 @@ class LoansResource extends Resource
                         'Expired' => 'danger'
                     })
                     ->label('Status'),
+                Tables\Columns\TextColumn::make('monetary.fee')
+                    ->money('IDR')
+                    ->label('Due Charge'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

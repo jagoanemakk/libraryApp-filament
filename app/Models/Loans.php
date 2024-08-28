@@ -36,8 +36,10 @@ class Loans extends Model
         'user_id',
         'books_id',
         'due_date',
-        'loan_status'
+        'loan_status',
     ];
+
+    protected $table = 'loans';
 
     protected $casts = [
         'due_date' => 'date:YYYY-MM-DD',
@@ -51,5 +53,10 @@ class Loans extends Model
     public function books(): BelongsTo
     {
         return $this->belongsTo(Books::class);
+    }
+
+    public function monetary(): BelongsTo
+    {
+        return $this->belongsTo(Monetary::class, 'id', 'loans_id');
     }
 }
