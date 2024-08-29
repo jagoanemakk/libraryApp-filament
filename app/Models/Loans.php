@@ -12,25 +12,6 @@ class Loans extends Model
 {
     use HasFactory;
 
-    // protected static function boot()
-    // {
-    //     parent::boot();
-
-    //     static::creating(function ($loans) {
-    //         $today = Carbon::today();
-    //         $dueDate = $this->due_date;
-
-    //         if ($dueDate > $today) {
-    //             $loans->loan_status = 'Expired';
-    //         } else if ($dueDate == $today) {
-    //             $loans->loan_status = 'Today';
-    //         } else {
-    //             $daysLeft = $dueDate->diffInDays($today);
-    //             $loans->loan_status = "{$daysLeft} Hari";
-    //         }
-    //     });
-    // }
-
     protected $fillable =
     [
         'user_id',
@@ -40,10 +21,6 @@ class Loans extends Model
     ];
 
     protected $table = 'loans';
-
-    protected $casts = [
-        'due_date' => 'date:YYYY-MM-DD',
-    ];
 
     public function users(): BelongsTo
     {
