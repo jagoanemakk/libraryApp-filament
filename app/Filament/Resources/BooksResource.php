@@ -3,28 +3,15 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\BooksResource\Pages;
-use App\Filament\Resources\BooksResource\RelationManagers;
 use App\Models\Books;
 use App\Models\Loans;
-use App\Models\Tags;
-use App\Models\User;
-use Carbon\Carbon;
-// use Tables\Actions\Action;
-use Tables\Actions\ActionGroup;
 use Filament\Forms;
-use Filament\Forms\Components\Checkbox;
-use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\SpatieTagsInput;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Wizard\Step;
 use Filament\Forms\Form;
-use Filament\Forms\Set;
 use Filament\Infolists\Components\Grid;
 use Filament\Infolists\Components\Group;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\Section;
-use Filament\Infolists\Components\SpatieTagsEntry;
 use Filament\Infolists\Components\Split;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
@@ -33,11 +20,7 @@ use Filament\Resources\Resource;
 use Filament\Support\Enums\IconPosition;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Tables;
-use Filament\Tables\Columns\CheckboxColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Spatie\Tags\Tag;
 
 class BooksResource extends Resource
 {
@@ -104,25 +87,35 @@ class BooksResource extends Resource
     {
         return $form
             ->schema([
-                Select::make('categories_id')
-                    ->relationship(name: 'categories', titleAttribute: 'name')
-                    ->preload(),
-                Forms\Components\TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('author')
-                    ->maxLength(255),
-                Forms\Components\TagsInput::make('tags')
-                    ->label('Tags')
-                    ->separator(',')
-                    ->required(),
-                Forms\Components\Textarea::make('description')
-                    ->maxLength(255)
-                    ->columnSpan(2)
-                    ->rows(5),
-                Forms\Components\FileUpload::make('image')
-                    ->image()
-                    ->required(),
+                Forms\Components\Section::make()
+                    ->schema([
+                        Select::make('categories_id')
+                            ->relationship(name: 'categories', titleAttribute: 'name')
+                            ->preload()
+                            ->columnSpan(2),
+                        Forms\Components\TextInput::make('name')
+                            ->label('Title')
+                            ->required()
+                            ->columnSpan(2)
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('author')
+                            ->columnSpan(2)
+                            ->maxLength(255),
+                        Forms\Components\TagsInput::make('tags')
+                            ->label('Tags')
+                            ->separator(',')
+                            ->columnSpan(2)
+                            ->required(),
+                        Forms\Components\RichEditor::make('description')
+                            ->maxLength(255)
+                            ->columnSpan(2),
+                    ])->columnSpan(1)->columns(2),
+                Forms\Components\Section::make()
+                    ->schema([
+                        Forms\Components\FileUpload::make('image')
+                            ->image()
+                            ->required(),
+                    ])->columnSpan(1)->columns(1),
             ]);
     }
 
