@@ -21,6 +21,7 @@ use Filament\Support\Enums\IconPosition;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 
 class BooksResource extends Resource
 {
@@ -86,36 +87,10 @@ class BooksResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
-            ->schema([
-                Forms\Components\Section::make()
-                    ->schema([
-                        Select::make('categories_id')
-                            ->relationship(name: 'categories', titleAttribute: 'name')
-                            ->preload()
-                            ->columnSpan(2),
-                        Forms\Components\TextInput::make('name')
-                            ->label('Title')
-                            ->required()
-                            ->columnSpan(2)
-                            ->maxLength(255),
-                        Forms\Components\TextInput::make('author')
-                            ->columnSpan(2)
-                            ->maxLength(255),
-                        Forms\Components\TagsInput::make('tags')
-                            ->label('Tags')
-                            ->separator(',')
-                            ->columnSpan(2)
-                            ->required(),
-                        Forms\Components\RichEditor::make('description')
-                            ->maxLength(255)
-                            ->columnSpan(2),
-                    ])->columnSpan(1)->columns(2),
-                Forms\Components\Section::make()
-                    ->schema([
-                        Forms\Components\FileUpload::make('image')
-                            ->image()
-                            ->required(),
-                    ])->columnSpan(1)->columns(1),
+            ->schema(static::getFormsComponents())
+            ->columns([
+                'md' => 1,
+                'lg' => 3
             ]);
     }
 
@@ -207,6 +182,50 @@ class BooksResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    public static function getFormsComponents(): array
+    {
+        return [
+            Forms\Components\Section::make()
+                ->schema([
+                    Select::make('categories_id')
+                        ->relationship(name: 'categories', titleAttribute: 'name')
+                        ->preload()
+                        ->columnSpan(2),
+                    Forms\Components\TextInput::make('name')
+                        ->label('Title')
+                        ->required()
+                        ->columnSpan(2)
+                        ->maxLength(255),
+                    Forms\Components\TextInput::make('author')
+                        ->columnSpan(2)
+                        ->maxLength(255),
+                    Forms\Components\TagsInput::make('tags')
+                        ->label('Tags')
+                        ->separator(',')
+                        ->columnSpan(2)
+                        ->required(),
+                    Forms\Components\RichEditor::make('description')
+                        ->maxLength(255)
+                        ->columnSpan(2),
+                ])
+                ->columnSpan([
+                    'md' => 1,
+                    'lg' => 2,
+                ]),
+            Forms\Components\Section::make()
+                ->schema([
+                    Forms\Components\FileUpload::make('image')
+                        ->label('Featured Image')
+                        ->image()
+                        ->imageEditor()
+                        ->required(),
+                ])
+                ->columnSpan([
+                    'lg' => 1,
+                ])
+        ];
     }
 
     public static function getRelations(): array
