@@ -32,7 +32,7 @@ class Loans extends Model
         return $this->belongsTo(Books::class);
     }
 
-    public function monetary(): BelongsTo
+    public function monetaries(): BelongsTo
     {
         return $this->belongsTo(Monetary::class, 'id', 'loans_id');
     }

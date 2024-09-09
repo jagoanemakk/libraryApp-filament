@@ -4,11 +4,21 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\LoansResource\Pages;
 use App\Filament\Resources\LoansResource\RelationManagers;
+use App\Models\Books;
 use App\Models\Loans;
-use Carbon\Carbon;
+use App\Models\Monetary;
+use Exception;
+use Illuminate\Support\Facades\DB;
 use Filament\Forms;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Notifications\Notification;
+use Filament\Resources\Pages\EditRecord;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\MaxWidth;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -25,15 +35,10 @@ class LoansResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
-            ->schema([
-                Forms\Components\Select::make('books_id')
-                    ->relationship('books', 'name')
-                    ->preload()
-                    ->required(),
-                Forms\Components\DatePicker::make('due_date')
-                    ->required(),
-                Forms\Components\TextInput::make('loan_status')
-                    ->maxLength(255),
+            ->schema(static::getFormsComponents())
+            ->columns([
+                'md' => 1,
+                'lg' => 3
             ]);
     }
 
@@ -55,10 +60,11 @@ class LoansResource extends Resource
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'Today' => 'warning',
-                        'Expired' => 'danger'
+                        'Expired' => 'danger',
+                        'Paid' => 'success'
                     })
                     ->label('Status'),
-                Tables\Columns\TextColumn::make('monetary.fee')
+                Tables\Columns\TextColumn::make('monetaries.fee')
                     ->money('IDR')
                     ->label('Due Charge'),
                 Tables\Columns\TextColumn::make('created_at')
@@ -70,7 +76,45 @@ class LoansResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\Action::make('Confirm Return')
+                        ->icon('heroicon-s-inbox-arrow-down')
+                        ->modalHeading('Confirm Return')
+                        ->modalDescription('Are you sure want to confirm this return ?')
+                        ->modalWidth(MaxWidth::Medium)
+                        ->hidden(fn (Loans $loans) => $loans->deletes_by != NULL)
+                        ->action(
+                            function (Loans $loans, Books $books): void {
+
+                                DB::beginTransaction();
+
+                                try {
+                                    $books->qty += 1;
+                                    $books->update();
+
+                                    $loans->monetaries->status = 'Return';
+                                    $loans->monetaries->update();
+
+                                    $loans->loan_status = 'Paid';
+                                    $loans->deletes_by = auth()->user()->name;
+                                    $loans->update();
+
+                                    DB::commit();
+                                    // $this->info('Return successfully.');
+
+                                    Notification::make()
+                                        ->title('Return Succesfull')
+                                        ->success()
+                                        ->send();
+                                } catch (Exception $e) {
+                                    DB::rollBack();
+                                    $e->getMessage();
+                                    // $this->error('An error occurred: ' . $e->getMessage());
+                                }
+                            }
+                        ),
+                    Tables\Actions\EditAction::make(),
+                ])
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -102,6 +146,36 @@ class LoansResource extends Resource
             'index' => Pages\ListLoans::route('/'),
             'create' => Pages\CreateLoans::route('/create'),
             'edit' => Pages\EditLoans::route('/{record}/edit'),
+        ];
+    }
+
+    public static function getFormsComponents(): array
+    {
+        return [
+            Forms\Components\Section::make()
+                ->schema([
+                    Forms\Components\Select::make('books_id')
+                        ->label('Books Title')
+                        ->relationship('books', 'name')
+                        ->preload()
+                        ->native(false)
+                        ->placeholder('Select book')
+                        ->required(),
+                    Forms\Components\DatePicker::make('due_date')
+                        ->label('Return Date')
+                        ->required(),
+                    Forms\Components\Select::make('loan_status')
+                        ->label('Status')
+                        ->visible(fn ($livewire): bool => $livewire instanceof EditRecord)
+                        ->options([
+                            'Expired' => 'Expired',
+                            'Today' => 'Today',
+                        ])
+                        ->native(false),
+                    Forms\Components\Placeholder::make('fee')
+                        ->label('Due Charge')
+                        ->content(fn (Loans $loans): ?string => $loans->monetaries->fee),
+                ])
         ];
     }
 }
