@@ -82,7 +82,8 @@ class LoansResource extends Resource
                         ->modalHeading('Confirm Return')
                         ->modalDescription('Are you sure want to confirm this return ?')
                         ->modalWidth(MaxWidth::Medium)
-                        ->hidden(fn (Loans $loans) => $loans->deletes_by != NULL)
+                        ->hidden(fn (Loans $loans) => $loans->deletes_by)
+                        ->visible(fn ($livewire): bool => $livewire instanceof EditRecord)
                         ->action(
                             function (Loans $loans, Books $books): void {
 
