@@ -61,9 +61,10 @@ class LoansResource extends Resource
                 Tables\Columns\TextColumn::make('loan_status')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
+                        'On Loans' => 'info',
                         'Today' => 'warning',
                         'Expired' => 'danger',
-                        'Paid' => 'success'
+                        'Return' => 'success'
                     })
                     ->label('Status'),
                 Tables\Columns\TextColumn::make('monetaries.fee')
@@ -87,20 +88,30 @@ class LoansResource extends Resource
                         ->hidden(fn (Loans $loans) => $loans->deletes_by)
                         ->authorize('create', User::class)
                         ->action(
-                            function (Loans $loans, Books $books): void {
+                            function (Loans $loans): void {
 
-                                DB::beginTransaction();
+                                // DB::beginTransaction();
 
                                 try {
-                                    $books->qty += 1;
-                                    $books->update();
+                                    if (!empty($loans->monetaries)) {
 
-                                    $loans->monetaries->status = 'Return';
-                                    $loans->monetaries->update();
+                                        $loans->books->qty += 1;
+                                        $loans->books->update();
 
-                                    $loans->loan_status = 'Paid';
-                                    $loans->deletes_by = auth()->user()->name;
-                                    $loans->update();
+                                        $loans->monetaries->status = 'Paid';
+                                        $loans->monetaries->update();
+
+                                        $loans->loan_status = 'Return';
+                                        $loans->deletes_by = auth()->user()->name;
+                                        $loans->update();
+                                    } else {
+                                        $loans->books->qty += 1;
+                                        $loans->books->update();
+
+                                        $loans->loan_status = 'Return';
+                                        $loans->deletes_by = auth()->user()->name;
+                                        $loans->update();
+                                    }
 
                                     DB::commit();
                                     // $this->info('Return successfully.');
