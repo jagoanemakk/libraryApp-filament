@@ -141,7 +141,7 @@ class BooksResource extends Resource
                         ])
                         ->action(
                             function (Loans $loans, Books $books, array $data): void {
-                                $totalLoans = Loans::where('user_id', auth()->user()->id)->count();
+                                $totalLoans = Loans::where('deletes_by', NULL)->count();
 
                                 $userRole = auth()->user()->roles->pluck("name")->first();
 
