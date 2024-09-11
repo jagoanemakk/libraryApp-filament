@@ -7,6 +7,8 @@ use App\Filament\Resources\LoansResource\RelationManagers;
 use App\Models\Books;
 use App\Models\Loans;
 use App\Models\Monetary;
+use App\Models\User;
+use App\Policies\LoansPolicy;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Filament\Forms;
@@ -83,7 +85,7 @@ class LoansResource extends Resource
                         ->modalDescription('Are you sure want to confirm this return ?')
                         ->modalWidth(MaxWidth::Medium)
                         ->hidden(fn (Loans $loans) => $loans->deletes_by)
-                        ->visible(fn ($livewire): bool => $livewire instanceof EditRecord)
+                        ->authorize('create', User::class)
                         ->action(
                             function (Loans $loans, Books $books): void {
 
