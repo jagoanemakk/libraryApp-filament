@@ -21,7 +21,8 @@ use Filament\Support\Enums\IconPosition;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Support\Str;
 
 class BooksResource extends Resource
 {
@@ -76,7 +77,7 @@ class BooksResource extends Resource
                     ]),
                 Section::make('Description')
                     ->schema([
-                        TextEntry::make('description')
+                        TextEntry::make('content')
                             ->prose()
                             ->markdown()
                             ->hiddenLabel()
@@ -103,7 +104,7 @@ class BooksResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('author')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('description')
+                Tables\Columns\TextColumn::make('content')
                     ->searchable()
                     ->limit(50),
                 Tables\Columns\TextColumn::make('qty')
@@ -195,9 +196,22 @@ class BooksResource extends Resource
                         ->columnSpan(2),
                     Forms\Components\TextInput::make('name')
                         ->label('Title')
+                        ->unique(table: Books::class)
+                        ->live(onBlur: true)
+                        ->afterStateUpdated(function (string $operation, ?string $state, ?string $old, Forms\Set $set, Forms\Get $get, ?Books $record) {
+                            if (($get('slug') ?? '') !== Str::slug($old)) {
+                                return;
+                            }
+                            $set('slug', Str::slug($state));
+                        })
                         ->required()
                         ->columnSpan(2)
-                        ->maxLength(255),
+                        ->minLength(1)
+                        ->maxLength(25),
+                    Forms\Components\TextInput::make('slug')
+                        ->required()
+                        ->columnSpan(2)
+                        ->maxLength(30),
                     Forms\Components\TextInput::make('author')
                         ->columnSpan(2)
                         ->maxLength(255),
@@ -206,7 +220,7 @@ class BooksResource extends Resource
                         ->separator(',')
                         ->columnSpan(2)
                         ->required(),
-                    Forms\Components\RichEditor::make('description')
+                    Forms\Components\RichEditor::make('content')
                         ->maxLength(255)
                         ->columnSpan(2),
                 ])
@@ -221,12 +235,19 @@ class BooksResource extends Resource
                         ->image()
                         ->imageEditor()
                         ->required(),
+                    // Forms\Components\FileUpload::make('image')
+                    //     ->label('Featured Image')
+                    //     ->image()
+                    //     ->imageEditor()
+                    //     ->required(),
                 ])
                 ->columnSpan([
                     'lg' => 1,
                 ])
         ];
     }
+
+
 
     public static function getRelations(): array
     {

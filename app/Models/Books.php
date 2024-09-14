@@ -21,7 +21,7 @@ class Books extends Model
         'categories_id',
         'name',
         'author',
-        'description',
+        'content',
         'tags',
         'qty',
         'status',
