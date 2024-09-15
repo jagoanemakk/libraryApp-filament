@@ -209,12 +209,10 @@ class BooksResource extends Resource
                         ->minLength(1)
                         ->maxLength(25),
                     Forms\Components\TextInput::make('slug')
-                        ->required()
+                        ->readOnly()
+                        ->disabled()
                         ->columnSpan(2)
                         ->maxLength(30),
-                    Forms\Components\TextInput::make('author')
-                        ->columnSpan(2)
-                        ->maxLength(255),
                     Forms\Components\TagsInput::make('tags')
                         ->label('Tags')
                         ->separator(',')
@@ -224,25 +222,29 @@ class BooksResource extends Resource
                         ->maxLength(255)
                         ->columnSpan(2),
                 ])
-                ->columnSpan([
-                    'md' => 1,
-                    'lg' => 2,
-                ]),
-            Forms\Components\Section::make()
+                ->columnSpan(2),
+            Forms\Components\Group::make()
                 ->schema([
-                    Forms\Components\FileUpload::make('image')
-                        ->label('Featured Image')
-                        ->image()
-                        ->imageEditor()
-                        ->required(),
-                    // Forms\Components\FileUpload::make('image')
-                    //     ->label('Featured Image')
-                    //     ->image()
-                    //     ->imageEditor()
-                    //     ->required(),
-                ])
-                ->columnSpan([
-                    'lg' => 1,
+                    Forms\Components\Section::make()
+                        ->schema([
+                            Forms\Components\FileUpload::make('image')
+                                ->label('Featured Image')
+                                ->image()
+                                ->imageEditor()
+                                ->required(),
+                        ])
+                        ->columnSpan(1),
+                    Forms\Components\Section::make('Metadata')
+                        ->schema([
+                            Forms\Components\TextInput::make('author')
+                                ->maxLength(255),
+                            Forms\Components\Placeholder::make('created_at')
+                                ->label('Created At')
+                                ->content(fn (Books $books): ?string => $books->created_at?->isoFormat('LLL')),
+                            Forms\Components\DateTimePicker::make('updated_at')
+                                ->default(now())
+                        ])->columnSpan(1)
+                        ->hidden(fn (string $operation): bool => $operation === 'create'),
                 ])
         ];
     }
