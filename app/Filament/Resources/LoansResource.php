@@ -3,20 +3,12 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\LoansResource\Pages;
-use App\Filament\Resources\LoansResource\RelationManagers;
-use App\Models\Books;
 use App\Models\Loans;
-use App\Models\Monetary;
 use App\Models\User;
-use App\Policies\LoansPolicy;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Filament\Forms;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Placeholder;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
-use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Resources\Resource;
@@ -24,7 +16,6 @@ use Filament\Support\Enums\MaxWidth;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class LoansResource extends Resource
 {
@@ -90,7 +81,7 @@ class LoansResource extends Resource
                         ->action(
                             function (Loans $loans): void {
 
-                                // DB::beginTransaction();
+                                DB::beginTransaction();
 
                                 try {
                                     if (!empty($loans->monetaries)) {
@@ -175,6 +166,11 @@ class LoansResource extends Resource
                         ->native(false)
                         ->placeholder('Select book')
                         ->required(),
+                    Forms\Components\Select::make('author')
+                        ->relationship('books', 'author')
+                        ->preload()
+                        ->native(false)
+                        ->label('Author'),
                     Forms\Components\DatePicker::make('due_date')
                         ->label('Return Date')
                         ->required(),
@@ -186,10 +182,26 @@ class LoansResource extends Resource
                             'Today' => 'Today',
                         ])
                         ->native(false),
-                    Forms\Components\Placeholder::make('fee')
-                        ->label('Due Charge')
-                        ->content(fn (Loans $loans): ?string => $loans->monetaries->fee),
                 ])
+                ->columnSpan(2),
+            Forms\Components\Section::make('Metadata')
+                ->schema([
+                    Forms\Components\Select::make('name')
+                        ->relationship('users', 'name')
+                        ->label('Loans by')
+                        ->preload()
+                        ->native(false),
+                    Forms\Components\Placeholder::make('created_at')
+                        ->label('Loans Date')
+                        ->content(fn (Loans $loans): ?string => $loans->created_at?->isoFormat('LLL')),
+                    Forms\Components\Placeholder::make('monetaries.fee')
+                        ->label('Due Charge')
+                        ->content(
+                            fn (Loans $record): ?string => $record->monetaries->fee
+                        )
+                        ->hidden(fn (string $operation): bool => $operation === 'create'),
+                ])->hidden(fn (string $operation): bool => $operation === 'create')
+                ->columnSpan(1)
         ];
     }
 }

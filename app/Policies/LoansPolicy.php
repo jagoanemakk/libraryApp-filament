@@ -33,11 +33,11 @@ class LoansPolicy
     /**
      * Determine whether the user can create models.
      */
-    public function create(User $user): bool
+    public function create(User $user)
     {
-        return $user->hasRole([
-            'Super Admin',
-        ]);
+        // return $user->hasRole([
+        //     'Super Admin',
+        // ]);
     }
 
     /**
