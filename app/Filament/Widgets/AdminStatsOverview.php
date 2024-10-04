@@ -31,6 +31,12 @@ class AdminStatsOverview extends BaseWidget
 
     public static function canView(): bool
     {
-        return !auth()->user()->roles->pluck('name')->where('name', '!=', 'SuperAdmin')->first();
+        $authUser = auth()->user()->roles->pluck('name')->first();
+
+        if ($authUser == 'Super Admin') {
+            return true;
+        }
+
+        return false;
     }
 }
