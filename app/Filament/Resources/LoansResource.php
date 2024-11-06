@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\LoansResource\Pages;
 use App\Models\Loans;
+use App\Models\Role;
 use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -15,6 +16,8 @@ use Filament\Resources\Resource;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role as ModelsRole;
 use Illuminate\Database\Eloquent\Builder;
 
 class LoansResource extends Resource
@@ -72,11 +75,12 @@ class LoansResource extends Resource
             ->actions([
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\Action::make('Confirm Return')
+                        // ->visible(fn (): bool => auth()->user()->can())
+                        ->modalDescription('Are you sure want to confirm this return ?')
                         ->icon('heroicon-s-inbox-arrow-down')
                         ->modalHeading('Confirm Return')
-                        ->modalDescription('Are you sure want to confirm this return ?')
                         ->modalWidth(MaxWidth::Medium)
-                        ->hidden(fn (Loans $loans) => $loans->deletes_by)
+                        ->visible(fn (Loans $loans) => $loans->deletes_by == null || $loans->deletes_by != null)
                         ->authorize('create', User::class)
                         ->action(
                             function (Loans $loans): void {
@@ -194,12 +198,12 @@ class LoansResource extends Resource
                     Forms\Components\Placeholder::make('created_at')
                         ->label('Loans Date')
                         ->content(fn (Loans $loans): ?string => $loans->created_at?->isoFormat('LLL')),
-                    Forms\Components\Placeholder::make('monetaries.fee')
-                        ->label('Due Charge')
-                        ->content(
-                            fn (Loans $record): ?string => $record->monetaries->fee
-                        )
-                        ->hidden(fn (string $operation): bool => $operation === 'create'),
+                    // Forms\Components\Placeholder::make('monetaries.fee')
+                    //     ->label('Due Charge')
+                    //     // ->content(
+                    //     //     fn (Loans $record): ?string => $record->monetaries->fee
+                    //     // )
+                    //     ->hidden(fn (string $operation): bool => $operation === 'create'),
                 ])->hidden(fn (string $operation): bool => $operation === 'create')
                 ->columnSpan(1)
         ];
