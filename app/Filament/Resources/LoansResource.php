@@ -4,8 +4,10 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\LoansResource\Pages;
 use App\Models\Loans;
+use App\Models\Monetary;
 use App\Models\Role;
 use App\Models\User;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Filament\Forms;
@@ -41,6 +43,7 @@ class LoansResource extends Resource
     public static function table(Table $table): Table
     {
         $userRoles = auth()->user()->roles->pluck('name')->first();
+
 
         return $table
             ->columns([

@@ -23,7 +23,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('optimize:clear');
 
         $schedule->command('loans:loan-status')->timezone('Asia/Jakarta');
-        $schedule->command('monetary:update-data');
+        $schedule->command('monetary:update-data')->timezone('Asia/Jakarta');
         // $schedule->command('monetary:update-fee');
     }
 
