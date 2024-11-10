@@ -129,6 +129,7 @@ class BooksResource extends Resource
                         ->mountUsing(fn (Forms\ComponentContainer $form, Loans $loans) => $form->fill([
                             'due_date' => $loans->due_date
                         ]))
+                        ->disabled(fn (Books $books) => $books->qty == 0)
                         ->form([
                             Forms\Components\DatePicker::make('due_date')
                                 ->label('Select Date')
