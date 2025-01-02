@@ -50,14 +50,14 @@ class BooksResource extends Resource
                                                 return $state > 0 ? 'Available' : 'Not Available';
                                             })
                                             ->badge()
-                                            ->color(fn ($state) => $state > 0 ? 'success' : 'warning')
+                                            ->color(fn($state) => $state > 0 ? 'success' : 'warning')
                                     ]),
                                     Group::make([
                                         TextEntry::make('categories.name'),
                                         TextEntry::make('qty')
                                             ->label('Quantity')
                                             ->badge()
-                                            ->color(fn ($state) => $state > 0 ? 'success' : 'warning'),
+                                            ->color(fn($state) => $state > 0 ? 'success' : 'warning'),
                                         TextEntry::make('tags')
                                             ->badge()
                                             ->color('success')
@@ -65,7 +65,8 @@ class BooksResource extends Resource
                                             ->icon('heroicon-s-hashtag')
                                             ->iconPosition(IconPosition::Before)
                                     ]),
-                                ]), ImageEntry::make('image')
+                                ]),
+                            ImageEntry::make('image')
                                 ->height(200)
                                 ->hiddenLabel()
                                 ->grow(false)
@@ -114,7 +115,7 @@ class BooksResource extends Resource
                     })
                     ->alignCenter()
                     ->badge()
-                    ->color(fn ($state) => $state > 0 ? 'success' : 'warning')
+                    ->color(fn($state) => $state > 0 ? 'success' : 'warning')
             ])
             ->filters([
                 //
@@ -126,10 +127,10 @@ class BooksResource extends Resource
                         ->modalHeading('Return date')
                         ->modalDescription('Maximum period of loan is 14 days')
                         ->modalWidth(MaxWidth::Medium)
-                        ->mountUsing(fn (Forms\ComponentContainer $form, Loans $loans) => $form->fill([
+                        ->mountUsing(fn(Forms\ComponentContainer $form, Loans $loans) => $form->fill([
                             'due_date' => $loans->due_date
                         ]))
-                        ->disabled(fn (Books $books) => $books->qty == 0)
+                        ->disabled(fn(Books $books) => $books->qty == 0)
                         ->form([
                             Forms\Components\DatePicker::make('due_date')
                                 ->label('Select Date')
@@ -176,7 +177,6 @@ class BooksResource extends Resource
                             }
                         ),
                     Tables\Actions\EditAction::make(),
-                    // Tables\Actions\DeleteAction::make(),
                 ])
             ])
             ->bulkActions([
@@ -241,11 +241,11 @@ class BooksResource extends Resource
                                 ->maxLength(255),
                             Forms\Components\Placeholder::make('created_at')
                                 ->label('Created At')
-                                ->content(fn (Books $books): ?string => $books->created_at?->isoFormat('LLL')),
+                                ->content(fn(Books $books): ?string => $books->created_at?->isoFormat('LLL')),
                             Forms\Components\DateTimePicker::make('updated_at')
                                 ->default(now())
                         ])->columnSpan(1)
-                        ->hidden(fn (string $operation): bool => $operation === 'create'),
+                        ->hidden(fn(string $operation): bool => $operation === 'create'),
                 ])
         ];
     }
