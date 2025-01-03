@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\BooksResource\Pages;
 use App\Models\Books;
 use App\Models\Loans;
+use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
@@ -21,7 +22,7 @@ use Filament\Support\Enums\IconPosition;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Widgets\StatsOverviewWidget\Stat;
+// use Filament\Forms\Components\Number;
 use Illuminate\Support\Str;
 
 class BooksResource extends Resource
@@ -98,6 +99,7 @@ class BooksResource extends Resource
 
     public static function table(Table $table): Table
     {
+
         return $table
             ->columns([
                 Tables\Columns\ImageColumn::make('image'),
@@ -186,6 +188,8 @@ class BooksResource extends Resource
             ]);
     }
 
+
+
     public static function getFormsComponents(): array
     {
         return [
@@ -197,7 +201,7 @@ class BooksResource extends Resource
                         ->columnSpan(2),
                     Forms\Components\TextInput::make('name')
                         ->label('Title')
-                        ->unique(table: Books::class)
+                        ->unique(table: Books::class, ignoreRecord: true)
                         ->live(onBlur: true)
                         ->afterStateUpdated(function (string $operation, ?string $state, ?string $old, Forms\Set $set, Forms\Get $get, ?Books $record) {
                             if (($get('slug') ?? '') !== Str::slug($old)) {
@@ -208,7 +212,12 @@ class BooksResource extends Resource
                         ->required()
                         ->columnSpan(2)
                         ->minLength(1)
-                        ->maxLength(25),
+                        ->maxLength(50),
+                    Forms\Components\TextInput::make('qty')
+                        ->label('Quantity')
+                        ->numeric()
+                        ->required()
+                        ->columnSpan(2),
                     Forms\Components\TextInput::make('slug')
                         ->readOnly()
                         ->disabled()
@@ -219,7 +228,8 @@ class BooksResource extends Resource
                         ->separator(',')
                         ->columnSpan(2)
                         ->required(),
-                    Forms\Components\RichEditor::make('content')
+                    Forms\Components\TextArea::make('content')
+                        ->rows(10)
                         ->maxLength(255)
                         ->columnSpan(2),
                 ])
@@ -241,11 +251,13 @@ class BooksResource extends Resource
                                 ->maxLength(255),
                             Forms\Components\Placeholder::make('created_at')
                                 ->label('Created At')
-                                ->content(fn(Books $books): ?string => $books->created_at?->isoFormat('LLL')),
+                                ->content(fn(Books $books): ?string => $books->created_at?->isoFormat('LLL'))
+                                ->hidden(fn(string $operation): bool => $operation === 'create'),
                             Forms\Components\DateTimePicker::make('updated_at')
                                 ->default(now())
+                                ->hidden(fn(string $operation): bool => $operation === 'create'),
                         ])->columnSpan(1)
-                        ->hidden(fn(string $operation): bool => $operation === 'create'),
+
                 ])
         ];
     }

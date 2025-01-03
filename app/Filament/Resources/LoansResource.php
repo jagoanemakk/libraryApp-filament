@@ -57,7 +57,7 @@ class LoansResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('loan_status')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn(string $state): string => match ($state) {
                         'On Loans' => 'info',
                         'Today' => 'warning',
                         'Expired' => 'danger',
@@ -83,7 +83,7 @@ class LoansResource extends Resource
                         ->icon('heroicon-s-inbox-arrow-down')
                         ->modalHeading('Confirm Return')
                         ->modalWidth(MaxWidth::Medium)
-                        ->visible(fn (Loans $loans) => $loans->deletes_by == null || $loans->deletes_by != null)
+                        ->visible(fn(Loans $loans) => $loans->deletes_by == null || $loans->deletes_by != null)
                         ->authorize('create', User::class)
                         ->action(
                             function (Loans $loans): void {
@@ -183,7 +183,7 @@ class LoansResource extends Resource
                         ->required(),
                     Forms\Components\Select::make('loan_status')
                         ->label('Status')
-                        ->visible(fn ($livewire): bool => $livewire instanceof EditRecord)
+                        ->visible(fn($livewire): bool => $livewire instanceof EditRecord)
                         ->options([
                             'Expired' => 'Expired',
                             'Today' => 'Today',
@@ -200,14 +200,14 @@ class LoansResource extends Resource
                         ->native(false),
                     Forms\Components\Placeholder::make('created_at')
                         ->label('Loans Date')
-                        ->content(fn (Loans $loans): ?string => $loans->created_at?->isoFormat('LLL')),
+                        ->content(fn(Loans $loans): ?string => $loans->created_at?->isoFormat('LLL')),
                     // Forms\Components\Placeholder::make('monetaries.fee')
                     //     ->label('Due Charge')
                     //     // ->content(
                     //     //     fn (Loans $record): ?string => $record->monetaries->fee
                     //     // )
                     //     ->hidden(fn (string $operation): bool => $operation === 'create'),
-                ])->hidden(fn (string $operation): bool => $operation === 'create')
+                ])->hidden(fn(string $operation): bool => $operation === 'create')
                 ->columnSpan(1)
         ];
     }
